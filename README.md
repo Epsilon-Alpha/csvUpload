@@ -9,12 +9,13 @@ A self-learning project (work in progress) written in ```Python``` which provide
 * SQLAlchemy to connect with the database
 * SQLite as Database
 
-## Steps followed (so far)
+## Steps followed (Alternate, done using Pandas)
 * Receive file via browse button
-* Detect schema of .csv file (Currently INT, REAL and TEXT supported)
+* ~~Detect schema of .csv file (Currently INT, REAL and TEXT supported)~~
 * Keep alphanumeric characters from filename
-* Create table with a dynamic SQL query with this new sanitized name and correct schema type
-* Insert into table using a SQL query
+* ~~Create table with a dynamic SQL query with this new sanitized name and correct schema type~~
+* ~~Insert into table using a SQL query~~
+* Insert into table using SQLAlchemy's to_sql()
 
 ## How to run
 Run the following command

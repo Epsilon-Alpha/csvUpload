@@ -31,6 +31,11 @@ def create_table(table_name, headers, schema):
             sql += temp[:-1] + ");"
             conn.execute(sql)
 
+def insert_df_to_table(table_name, df):
+    with engine.connect() as conn:
+        conn.execute("DROP TABLE IF EXISTS {};".format(table_name))
+    df.to_sql(table_name, engine)
+
 def insert_into_table(table_name, headers_len, rows):
     placeholders = ','.join('?' * headers_len)
     query = f'INSERT INTO {table_name} VALUES({placeholders})'

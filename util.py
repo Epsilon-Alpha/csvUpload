@@ -4,6 +4,8 @@ import os
 import random
 import pandas as pd
 from string import ascii_letters as letters, digits
+
+from pandas.io.parsers import read_csv
 from app import log
 
 engine = None
@@ -29,7 +31,7 @@ def datatype(entity):
     except:
         return 'VARCHAR'
 
-def detect_schema(filename):
+def detect_schema_manual(filename):
     fields = []
     rows = []
     field_types = []
@@ -67,6 +69,30 @@ def detect_schema(filename):
 
     log.info(fields, " -> ", field_types)
     return (fields, field_types, rows)
+
+def create_dataframe(file):
+    df = pd.read_csv(file)
+    return df
+
+def detect_schema_pandas(file):
+    df = pd.read_csv(file)
+    if len(df) == 0:
+        print("Empty CSV File")
+        return None, None, None
+    
+    headers = [*df]
+    field_types = []
+    for dtype in df.dtypes:
+        data_type = str(dtype)
+        if 'int' in data_type:
+            field_types.append('INT')
+        elif 'float' in data_type:
+            field_types.append('FLOAT')
+        else:
+            field_types.append('TEXT')
+    
+    return (headers, field_types, df)
+    
 
 def sanitize_name(filename):
     new_name = str()
