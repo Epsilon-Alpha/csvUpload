@@ -1,8 +1,9 @@
 import datetime
 import csv
 import os
-from string import ascii_letters as letters, digits
 import random
+import pandas as pd
+from string import ascii_letters as letters, digits
 from app import log
 
 engine = None

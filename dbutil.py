@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData, Table, select
 from sqlalchemy.exc import SQLAlchemyError
 
 def db_connect():
@@ -37,3 +37,12 @@ def insert_into_table(table_name, headers_len, rows):
     with engine.connect() as conn:
         conn.execute(query, rows)
 
+def pull_from_table(table_name):
+    with engine.connect() as conn:
+        metadata = MetaData()
+        data = Table(table_name, metadata,autoload=True,autoload_with=engine)
+        query = select([data])
+        ResultProxy = conn.execute(query)
+        ResultSet = ResultProxy.fetchall()
+    
+    return ResultSet
