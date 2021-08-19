@@ -25,7 +25,7 @@ Run the following command
 Visit http://localhost:6543/
 
 ## Future improvements
-* Retrieve data from DB on the frontend
+* ~~Retrieve data from DB on the frontend~~
 * Give an option to select from the tables uploaded so far
 * Use PostgreSQL server
 * Use Celery
