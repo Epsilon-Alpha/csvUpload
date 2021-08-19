@@ -26,7 +26,7 @@ def create_table(table_name, headers, schema):
 
             temp =  str()
             for header, schema in zip(headers, schema):
-                temp += f'{header} {schema},'
+                temp += f'`{header}` {schema},'
 
             sql += temp[:-1] + ");"
             conn.execute(sql)
