@@ -7,7 +7,7 @@
         <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
     </head>
     <body>
-        <table id="csv_table" class="display">
+        <table id="csv_table" class="display" style="visibility:hidden">
             <thead>
                 <tr>
                 {% if headers %}
@@ -34,6 +34,7 @@
         <script type="text/javascript">
             $(document).ready( function () {
                 $('#csv_table').DataTable();
+                $('#csv_table').css("visibility","visible");
             } );
         </script>
     </body>

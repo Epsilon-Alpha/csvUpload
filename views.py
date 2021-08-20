@@ -2,10 +2,10 @@ from pyramid.response import Response
 from pyramid.view import view_config
 import pandas as pd
 import json
-from dbutil import create_table, insert_into_table, pull_from_table, retrieve_tables_from_db
-from util import detect_schema, sanitize_name
+from util.dbutil import create_table, insert_into_table, pull_from_table, retrieve_tables_from_db
+from util.csvutil import detect_schema, sanitize_name
 
-@view_config(route_name='home', renderer='csv_upload.jinja2')
+@view_config(route_name='home', renderer='templates/csv_upload.jinja2')
 def home_view(request):
     return dict()
 
@@ -20,7 +20,7 @@ def get_headers_view(request):
     table_name = request.matchdict['table_name']
     
 
-@view_config(route_name='upload', renderer='display.jinja2')
+@view_config(route_name='upload', renderer='templates/display.jinja2')
 def upload_view(request):
     filename = request.POST['csv_file'].filename
     input_file = request.POST['csv_file'].file

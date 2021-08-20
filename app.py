@@ -1,7 +1,7 @@
 from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
 import logging
-from dbutil import db_connect
+from util.dbutil import db_connect
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.NOTSET)
@@ -12,6 +12,7 @@ def run_server():
         config.add_route('upload', '/upload')
         config.add_route('get_tables', '/tables')
         config.add_route('get_headers', '/columns/{table}')
+        config.add_static_view(name='static', path='static')
         config.include('pyramid_jinja2')
         config.scan('views')
         app = config.make_wsgi_app()
