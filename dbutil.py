@@ -46,3 +46,6 @@ def pull_from_table(table_name):
         ResultSet = ResultProxy.fetchall()
     
     return ResultSet
+
+def retrieve_tables_from_db():
+    return engine.table_names()

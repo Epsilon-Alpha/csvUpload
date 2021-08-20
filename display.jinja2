@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Displaying {{table_name}}</title>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    </head>
+    <body>
+        <table id="csv_table" class="display">
+            <thead>
+                <tr>
+                {% if headers %}
+                    {% for head in headers %}
+                        <th>{{ head }}</th>
+                    {% endfor %}
+                {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% if data %}
+                {% for row in data %}
+                    {% if headers %}
+                        <tr>
+                        {% for head in headers %}
+                            <td>{{ row[head] }}</td>
+                        {% endfor %}
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#csv_table').DataTable();
+            } );
+        </script>
+    </body>
+</html>
