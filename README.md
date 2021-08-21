@@ -17,7 +17,7 @@ A self-learning project (work in progress) written in ```Python``` which provide
 * Create table with a dynamic SQL query with this new sanitized name and correct schema type
 * Insert into table using a SQL query
 * Retrieve the table from database and send JSON to frontend
-* Display using 
+* Display table using [DataTables](https://datatables.net/)
 
 ## How to run
 * Run the following command
