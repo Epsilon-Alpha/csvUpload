@@ -3,7 +3,7 @@ from pyramid.view import view_config
 import pandas as pd
 import json
 from util.dbutil import create_table, insert_into_table, pull_from_table, retrieve_tables_from_db
-from util.csvutil import detect_schema, sanitize_name
+from util.csvutil import detect_headers, detect_schema, read_csv_from_file, sanitize_name, get_rows_from_csv
 
 @view_config(route_name='home', renderer='templates/csv_upload.jinja2')
 def home_view(request):
@@ -24,10 +24,13 @@ def get_headers_view(request):
 def upload_view(request):
     filename = request.POST['csv_file'].filename
     input_file = request.POST['csv_file'].file
-    headers, schema, rows  = detect_schema(input_file)
-    if rows == 0:
+    csvreader = read_csv_from_file(input_file)
+    headers = detect_headers(csvreader)
+    rows = get_rows_from_csv(csvreader)
+    if rows == None:
         return Response('Empty CSV')
 
+    schema  = detect_schema(rows)
     table_name = sanitize_name(filename)
     create_table(table_name, headers, schema)
     insert_into_table(table_name, len(headers), rows)

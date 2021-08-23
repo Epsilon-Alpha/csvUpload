@@ -2,9 +2,7 @@ import datetime
 import csv
 import os
 import random
-import pandas as pd
 from string import ascii_letters as letters, digits
-from app import log
 
 engine = None
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -29,23 +27,28 @@ def datatype(entity):
     except:
         return 'VARCHAR'
 
-def detect_schema(filename):
-    fields = []
-    rows = []
-    field_types = []
-
+def read_csv_from_file(filename):
     decoded_file = filename.read().decode('utf-8')
     file_t = decoded_file.splitlines()
     csvreader = csv.reader(file_t)
+    return csvreader
+
+def detect_headers(csvreader):
     fields = next(csvreader)
-    
+    return fields
+
+def get_rows_from_csv(csvreader):
+    rows = []
     for row in csvreader:
         rows.append(row)
-    
+    return rows
+
+def detect_schema(rows):
+    field_types = []    
     row_size = len(rows)
     if row_size == 0:
         print("Empty CSV File")
-        return None, None, None
+        return None
     
     col_size = len(rows[0])
     for i in range(col_size):
@@ -65,8 +68,7 @@ def detect_schema(filename):
         else:
             field_types.append('VARCHAR')
 
-    log.info(fields, " -> ", field_types)
-    return (fields, field_types, rows)
+    return field_types
 
 def sanitize_name(filename):
     new_name = str()

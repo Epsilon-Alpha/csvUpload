@@ -1,24 +1,28 @@
 from sqlalchemy import create_engine, MetaData, Table, select
 from sqlalchemy.exc import SQLAlchemyError
+import logging
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 def db_connect():
     try:
         global engine
-        engine = create_engine('sqlite:///testdb.db', echo = True)
-        print("Connected to DB!")
+        engine = create_engine('sqlite:///testdb.db')
+        log.info("Connected to DB!")
     except SQLAlchemyError as e:
         err=str(e.__dic__['orig'])
-        print("Error while connecting to SQLite", err)
+        log.error("Error while connecting to SQLite", err)
 
 def create_table(table_name, headers, schema):
     cols, schema_len = len(headers), len(schema)
     if cols == 0:
-        print("No column in file!")
+        log.error("No column in file!")
     elif cols != schema_len:
-        print("Data inconsistency.")
+        log.error("Data inconsistency.")
 
     if engine == None:
-        print("Database connectivity issue.")
+        log.error("Database connectivity issue.")
     else:
         with engine.connect() as conn:
             conn.execute("DROP TABLE IF EXISTS {};".format(table_name))
@@ -30,12 +34,14 @@ def create_table(table_name, headers, schema):
 
             sql += temp[:-1] + ");"
             conn.execute(sql)
+        log.info(f"Table {table_name} created successfully!")
 
 def insert_into_table(table_name, headers_len, rows):
     placeholders = ','.join('?' * headers_len)
     query = f'INSERT INTO {table_name} VALUES({placeholders})'
     with engine.connect() as conn:
         conn.execute(query, rows)
+    log.info(f"Inserted into table {table_name} successfully!")
 
 def pull_from_table(table_name):
     with engine.connect() as conn:
@@ -45,6 +51,7 @@ def pull_from_table(table_name):
         ResultProxy = conn.execute(query)
         ResultSet = ResultProxy.fetchall()
     
+    log.info(f"Data pulled from table {table_name} successfully!")
     return ResultSet
 
 def retrieve_tables_from_db():

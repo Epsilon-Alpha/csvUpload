@@ -4,7 +4,7 @@ import logging
 from util.dbutil import db_connect
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.NOTSET)
+log.setLevel(logging.INFO)
 
 def run_server():
     with Configurator() as config:
@@ -20,6 +20,7 @@ def run_server():
     server.serve_forever()
 
 if __name__ == '__main__':
-    log.info("Started")
+    log.debug("Started")
+    print("Server started at http://localhost:6543/")
     db_connect()
     run_server()

@@ -1,2 +1,3 @@
 SQLAlchemy
 pyramid
+pyramid_jinja2
