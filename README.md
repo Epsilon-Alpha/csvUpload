@@ -1,22 +1,24 @@
-# CSV File Upload to Database
+# CSV File Upload
+
+<p align="center"><img src="screenshot.png"/></p>
 
 ## Description
 A self-learning project (work in progress) written in ```Python``` which provides a simple button on the frontend to upload a CSV file, and then pushes it to the database.
 
 ## Tech Stack
 * HTML to receive .CSV file using jinja2 template
-* Pyramid as a web server
-* SQLAlchemy to connect with the database
+* Pyramid as a web framework
+* SQLAlchemy for database management
 * SQLite as Database
 * jQuery + HTML + CSS template for file upload
 
-## Steps followed (so far)
+## Steps followed
 * Receive file via browse button
 * Detect schema of .csv file (Currently INT, REAL and TEXT supported)
-* Keep alphanumeric characters from filename
+* Sanitize filename by keeping alphanumeric characters
 * Create table with a dynamic SQL query with this new sanitized name and correct schema type
 * Insert into table using a SQL query
-* Retrieve the table from database and send JSON to frontend
+* Retrieve the table from database and send rows as JSON to frontend
 * Display table using [DataTables](https://datatables.net/)
 
 ## How to run
@@ -29,7 +31,7 @@ A self-learning project (work in progress) written in ```Python``` which provide
 * Select a CSV file which is UTF-8 compatable, and has the first row as headers.
 
 ## Future improvements
-* Add test cases
+* Add more test cases
 * Give an option to select from the tables uploaded so far
 * Use PostgreSQL server
 * Use Celery
