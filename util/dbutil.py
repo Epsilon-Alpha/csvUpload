@@ -5,10 +5,10 @@ import logging
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
-def db_connect():
+def db_connect(db_name):
     try:
         global engine
-        engine = create_engine('sqlite:///testdb.db')
+        engine = create_engine(db_name)
         log.info("Connected to DB!")
     except SQLAlchemyError as e:
         err=str(e.__dic__['orig'])
@@ -56,3 +56,8 @@ def pull_from_table(table_name):
 
 def retrieve_tables_from_db():
     return engine.table_names()
+
+def retrieve_columns_from_table(table_name):
+    meta = MetaData()
+    table = Table(table_name, meta, autoload_with=engine)
+    return [col.name for col in table.columns]

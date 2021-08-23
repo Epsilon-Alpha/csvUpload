@@ -11,7 +11,7 @@ def run_server():
         config.add_route('home', '/')
         config.add_route('upload', '/upload')
         config.add_route('get_tables', '/tables')
-        config.add_route('get_headers', '/columns/{table}')
+        config.add_route('get_headers', '/columns/{table_name}')
         config.add_static_view(name='static', path='static')
         config.include('pyramid_jinja2')
         config.scan('views')
@@ -22,5 +22,5 @@ def run_server():
 if __name__ == '__main__':
     log.debug("Started")
     print("Server started at http://localhost:6543/")
-    db_connect()
+    db_connect('sqlite:///testdb.db')
     run_server()

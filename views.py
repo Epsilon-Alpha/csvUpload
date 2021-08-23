@@ -2,7 +2,9 @@ from pyramid.response import Response
 from pyramid.view import view_config
 import pandas as pd
 import json
-from util.dbutil import create_table, insert_into_table, pull_from_table, retrieve_tables_from_db
+
+from sqlalchemy.exc import NoSuchTableError
+from util.dbutil import create_table, insert_into_table, pull_from_table, retrieve_columns_from_table, retrieve_tables_from_db
 from util.csvutil import detect_headers, detect_schema, read_csv_from_file, sanitize_name, get_rows_from_csv
 
 @view_config(route_name='home', renderer='templates/csv_upload.jinja2')
@@ -12,13 +14,21 @@ def home_view(request):
 @view_config(route_name='get_tables', renderer='json')
 def get_tables_view(request):
     list_of_tables = retrieve_tables_from_db()
-    context = {'tables': list_of_tables}
-    return context
+    if len(list_of_tables) == 0:
+        return Response('No tables found.', status_code=404)
+        
+    data = {'tables': list_of_tables}
+    return data
 
 @view_config(route_name='get_headers', renderer='json')
 def get_headers_view(request):
-    table_name = request.matchdict['table_name']
-    
+    try:
+        table_name = request.matchdict['table_name']
+        list_of_columns = retrieve_columns_from_table(table_name)
+        data = {'columns': list_of_columns}
+        return data
+    except NoSuchTableError:
+        return Response('Table not found.', status_code=404)
 
 @view_config(route_name='upload', renderer='templates/display.jinja2')
 def upload_view(request):
