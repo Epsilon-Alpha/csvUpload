@@ -4,8 +4,8 @@ import pandas as pd
 import json
 
 from sqlalchemy.exc import NoSuchTableError
-from util.dbutil import create_table, insert_into_table, postgres_test, pull_from_table, retrieve_columns_from_table, retrieve_tables_from_db
-from util.csvutil import detect_headers, read_csv_from_file, get_rows_from_csv
+from util.dbutil import get_database_type, create_table, insert_into_table, postgres_insert, pull_from_table, retrieve_columns_from_table, retrieve_tables_from_db
+from util.csvutil import detect_headers, read_csv_from_file_and_save, get_rows_from_csv
 from util.tasks import detect_schema, sanitize_name
 
 @view_config(route_name='home', renderer='templates/csv_upload.jinja2')
@@ -35,18 +35,20 @@ def get_headers_view(request):
 def upload_view(request):
     filename = request.POST['csv_file'].filename
     input_file = request.POST['csv_file'].file
-    csvreader = read_csv_from_file(input_file)
+    csvreader = read_csv_from_file_and_save(input_file)
     headers = detect_headers(csvreader)
     rows = get_rows_from_csv(csvreader)
-    # if rows == None:
-    #     return Response('Empty CSV')
+    if rows == None:
+        return Response('Empty CSV')
 
     schema  = detect_schema(rows)
     table_name = sanitize_name(filename)
     create_table(table_name, headers, schema)
-    # insert_into_table(table_name, headers, rows)
-
-    postgres_test(input_file, table_name)
+    DB_TYPE = get_database_type()
+    if DB_TYPE == 'sqlite':
+        insert_into_table(table_name, headers, rows)
+    else:
+        postgres_insert(table_name)
     ResultSet = pull_from_table(table_name)
     df = pd.DataFrame(ResultSet, columns=headers)
     json_data = df.to_json(orient='records')

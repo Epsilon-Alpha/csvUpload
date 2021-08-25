@@ -1,8 +1,6 @@
 from sqlalchemy import create_engine, MetaData, Table, select
 from sqlalchemy.exc import SQLAlchemyError
 import psycopg2
-import csv
-from util.csvutil import read_csv_from_file
 import logging
 
 from sqlalchemy.sql.expression import table
@@ -12,20 +10,24 @@ log.setLevel(logging.INFO)
 
 DB_TYPE = None
 
-def db_connect(db_name):
+def db_connect(db_string):
     try:
         global engine
         global DB_TYPE
-        engine = create_engine(db_name)
-        if 'postgresql' in db_name:
+        if 'postgres' in db_string:
             DB_TYPE = 'postgres'
-        else:
+        elif 'sqlite in db_string':
             DB_TYPE = 'sqlite'
+
+        engine = create_engine(db_string)
         log.info("Connected to DB!")
         return True
     except SQLAlchemyError as e:
         log.error("Error while connecting to Database")
         return False
+
+def get_database_type():
+    return DB_TYPE
 
 def create_table(table_name, headers, schema):
     cols, schema_len = len(headers), len(schema)
@@ -54,33 +56,27 @@ def create_table(table_name, headers, schema):
     log.info(f"Table {table_name} created successfully!")
 
 def insert_into_table(table_name, headers, rows):
-    if DB_TYPE == 'sqlite':
-        insert_into_table_sqlite(table_name, headers, rows)
-    elif DB_TYPE == 'postgres':
-        insert_into_table_postgres(table_name, headers, rows)
-
-def insert_into_table_sqlite(table_name, headers, rows):
     placeholders = ','.join('?' * len(headers))
     query = f'INSERT INTO {table_name} VALUES({placeholders})'
     with engine.connect() as conn:
         conn.execute(query, rows)
     log.info(f"Inserted into table {table_name} successfully!")
+   
+# def insert_into_table_postgres(table_name, headers, rows):
+#     for row in rows:
+#         headers_formatted = ','.join(f'"{h}"' for h in headers)
+#         row_formatted = str()
+#         for item in row:
+#             if "'" in item:
+#                 item = item.replace("'", "''")
+#             row_formatted += f"E'{item}',"
+#         row_formatted = row_formatted[:-1]
+#         query = f'INSERT INTO {table_name} ({headers_formatted}) VALUES({row_formatted})'
+#         with engine.connect() as conn:
+#            conn.execute(query)
+#     log.info(f"Inserted into table {table_name} successfully!")
 
-def insert_into_table_postgres(table_name, headers, rows):
-    for row in rows:
-        headers_formatted = ','.join(f'"{h}"' for h in headers)
-        row_formatted = str()
-        for item in row:
-            if "'" in item:
-                item = item.replace("'", "''")
-            row_formatted += f"E'{item}',"
-        row_formatted = row_formatted[:-1]
-        query = f'INSERT INTO {table_name} ({headers_formatted}) VALUES({row_formatted})'
-        with engine.connect() as conn:
-           conn.execute(query)
-    log.info(f"Inserted into table {table_name} successfully!")
-
-def postgres_test(filename, table_name):
+def postgres_insert(table_name):
     conn = psycopg2.connect("host=localhost dbname=testdb user=postgres password=00000000")
     cur = conn.cursor()
     with open('temp.csv') as f:

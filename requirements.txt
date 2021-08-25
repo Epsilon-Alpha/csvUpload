@@ -1,3 +1,5 @@
 SQLAlchemy
 pyramid
 pyramid_jinja2
+pandas
+psycopg2

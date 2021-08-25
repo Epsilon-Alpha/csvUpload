@@ -26,7 +26,7 @@ def datatype(entity):
     except:
         return 'VARCHAR'
 
-def read_csv_from_file(filename):
+def read_csv_from_file_and_save(filename):
     read_file = filename.read()
     decoded_file = read_file.decode('utf-8')
     with open('temp.csv', 'w') as f:

@@ -9,7 +9,7 @@ A self-learning project (work in progress) written in ```Python``` which provide
 * HTML to receive .CSV file using jinja2 template
 * Pyramid as a web framework
 * SQLAlchemy for database management
-* SQLite as Database
+* SQLite or Postgres as Database
 * jQuery + HTML + CSS template for file upload
 
 ## Steps followed
@@ -33,7 +33,6 @@ A self-learning project (work in progress) written in ```Python``` which provide
 ## Future improvements
 * Add more test cases
 * Give an option to select from the tables uploaded so far
-* Use PostgreSQL server
 * Use Celery
 
 ## References
