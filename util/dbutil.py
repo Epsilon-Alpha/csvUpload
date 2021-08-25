@@ -1,18 +1,31 @@
 from sqlalchemy import create_engine, MetaData, Table, select
 from sqlalchemy.exc import SQLAlchemyError
+import psycopg2
+import csv
+from util.csvutil import read_csv_from_file
 import logging
+
+from sqlalchemy.sql.expression import table
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
+DB_TYPE = None
+
 def db_connect(db_name):
     try:
         global engine
+        global DB_TYPE
         engine = create_engine(db_name)
+        if 'postgresql' in db_name:
+            DB_TYPE = 'postgres'
+        else:
+            DB_TYPE = 'sqlite'
         log.info("Connected to DB!")
+        return True
     except SQLAlchemyError as e:
-        err=str(e.__dic__['orig'])
-        log.error("Error while connecting to SQLite", err)
+        log.error("Error while connecting to Database")
+        return False
 
 def create_table(table_name, headers, schema):
     cols, schema_len = len(headers), len(schema)
@@ -25,28 +38,63 @@ def create_table(table_name, headers, schema):
         log.error("Database connectivity issue.")
     else:
         with engine.connect() as conn:
-            conn.execute("DROP TABLE IF EXISTS {};".format(table_name))
-            sql = 'CREATE TABLE "{}" ('.format(table_name);
+            conn.execute(f"DROP TABLE IF EXISTS {table_name};")
+            sql = 'CREATE TABLE {} ('.format(table_name);
 
-            temp =  str()
-            for header, schema in zip(headers, schema):
-                temp += f'`{header}` {schema},'
+            temp = str()
+            if DB_TYPE == 'postgres':
+                for header, schema in zip(headers, schema):
+                    temp += f'"{header}" {schema},'
+            else:
+                for header, schema in zip(headers, schema):
+                    temp += f'`{header}` {schema},'
 
             sql += temp[:-1] + ");"
             conn.execute(sql)
-        log.info(f"Table {table_name} created successfully!")
+    log.info(f"Table {table_name} created successfully!")
 
-def insert_into_table(table_name, headers_len, rows):
-    placeholders = ','.join('?' * headers_len)
+def insert_into_table(table_name, headers, rows):
+    if DB_TYPE == 'sqlite':
+        insert_into_table_sqlite(table_name, headers, rows)
+    elif DB_TYPE == 'postgres':
+        insert_into_table_postgres(table_name, headers, rows)
+
+def insert_into_table_sqlite(table_name, headers, rows):
+    placeholders = ','.join('?' * len(headers))
     query = f'INSERT INTO {table_name} VALUES({placeholders})'
     with engine.connect() as conn:
         conn.execute(query, rows)
     log.info(f"Inserted into table {table_name} successfully!")
 
+def insert_into_table_postgres(table_name, headers, rows):
+    for row in rows:
+        headers_formatted = ','.join(f'"{h}"' for h in headers)
+        row_formatted = str()
+        for item in row:
+            if "'" in item:
+                item = item.replace("'", "''")
+            row_formatted += f"E'{item}',"
+        row_formatted = row_formatted[:-1]
+        query = f'INSERT INTO {table_name} ({headers_formatted}) VALUES({row_formatted})'
+        with engine.connect() as conn:
+           conn.execute(query)
+    log.info(f"Inserted into table {table_name} successfully!")
+
+def postgres_test(filename, table_name):
+    conn = psycopg2.connect("host=localhost dbname=testdb user=postgres password=00000000")
+    cur = conn.cursor()
+    with open('temp.csv') as f:
+        next(f)
+        cur.copy_from(f, table_name.lower(), sep=',')
+        conn.commit()
+        conn.close()
+
 def pull_from_table(table_name):
+    if DB_TYPE == 'postgres':
+        table_name = table_name.lower()
     with engine.connect() as conn:
         metadata = MetaData()
-        data = Table(table_name, metadata,autoload=True,autoload_with=engine)
+        data = Table(table_name,metadata,autoload=True,autoload_with=engine)
         query = select([data])
         ResultProxy = conn.execute(query)
         ResultSet = ResultProxy.fetchall()

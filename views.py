@@ -4,8 +4,9 @@ import pandas as pd
 import json
 
 from sqlalchemy.exc import NoSuchTableError
-from util.dbutil import create_table, insert_into_table, pull_from_table, retrieve_columns_from_table, retrieve_tables_from_db
-from util.csvutil import detect_headers, detect_schema, read_csv_from_file, sanitize_name, get_rows_from_csv
+from util.dbutil import create_table, insert_into_table, postgres_test, pull_from_table, retrieve_columns_from_table, retrieve_tables_from_db
+from util.csvutil import detect_headers, read_csv_from_file, get_rows_from_csv
+from util.tasks import detect_schema, sanitize_name
 
 @view_config(route_name='home', renderer='templates/csv_upload.jinja2')
 def home_view(request):
@@ -37,13 +38,15 @@ def upload_view(request):
     csvreader = read_csv_from_file(input_file)
     headers = detect_headers(csvreader)
     rows = get_rows_from_csv(csvreader)
-    if rows == None:
-        return Response('Empty CSV')
+    # if rows == None:
+    #     return Response('Empty CSV')
 
     schema  = detect_schema(rows)
     table_name = sanitize_name(filename)
     create_table(table_name, headers, schema)
-    insert_into_table(table_name, len(headers), rows)
+    # insert_into_table(table_name, headers, rows)
+
+    postgres_test(input_file, table_name)
     ResultSet = pull_from_table(table_name)
     df = pd.DataFrame(ResultSet, columns=headers)
     json_data = df.to_json(orient='records')

@@ -1,4 +1,4 @@
-from csvUpload.util.csvutil import sanitize_name
+from csvUpload.util.tasks import sanitize_name
 
 class TestFilenameSanitization:
     def test_1(self):

@@ -1,10 +1,6 @@
 import datetime
 import csv
-import os
-import random
-from string import ascii_letters as letters, digits
 
-engine = None
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 def validate_num(num_text):
@@ -20,15 +16,22 @@ def validate_date(date_text):
 def datatype(entity):
     try:
         variable_data_type = str(type(eval(entity)))
-        if 'float' in variable_data_type:
-            return 'REAL'
-        elif 'int' in variable_data_type:
-            return 'INT'
+        if validate_num(entity):
+            if 'float' in variable_data_type:
+                return 'REAL'
+            elif 'int' in variable_data_type:
+                return 'INT'
+        else:
+            return 'VARCHAR'
     except:
         return 'VARCHAR'
 
 def read_csv_from_file(filename):
-    decoded_file = filename.read().decode('utf-8')
+    read_file = filename.read()
+    decoded_file = read_file.decode('utf-8')
+    with open('temp.csv', 'w') as f:
+        f.write(decoded_file)
+    
     file_t = decoded_file.splitlines()
     csvreader = csv.reader(file_t)
     return csvreader
@@ -43,39 +46,3 @@ def get_rows_from_csv(csvreader):
         rows.append(row)
     return rows
 
-def detect_schema(rows):
-    field_types = []    
-    row_size = len(rows)
-    if row_size == 0:
-        print("Empty CSV File")
-        return None
-    
-    col_size = len(rows[0])
-    for i in range(col_size):
-        real_type = True
-        int_type = True
-        for j in range(row_size):
-            type_returned = datatype(rows[j][i])
-            int_type &= (type_returned == 'INT')
-            real_type &= (type_returned == 'REAL')
-            if not (int_type or real_type):
-                break
-            
-        if int_type:
-            field_types.append('INT')
-        elif real_type:
-            field_types.append('REAL')
-        else:
-            field_types.append('VARCHAR')
-
-    return field_types
-
-def sanitize_name(filename):
-    new_name = str()
-    filename = os.path.splitext(filename)[0]
-    for char in filename:
-        if char in digits or char in letters:
-            new_name += char
-    if len(new_name) == 0:
-        new_name = ''.join(random.choice(letters) for i in range(6))
-    return new_name
