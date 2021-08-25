@@ -1,13 +1,10 @@
 from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
-import logging
 from util.dbutil import db_connect
+import logging
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
-
-# DB_STRING = 'sqlite:///testdb.db'
-DB_STRING = 'postgresql+psycopg2://postgres:00000000@localhost/testdb'
 
 def run_server():
     with Configurator() as config:
@@ -25,7 +22,7 @@ def run_server():
 def main():
     log.debug("Started")
     print("Server started at http://localhost:6543/")
-    if not db_connect(DB_STRING):
+    if not db_connect():
         return
     run_server()
 

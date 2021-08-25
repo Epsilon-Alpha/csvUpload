@@ -4,7 +4,7 @@ import pandas as pd
 import json
 
 from sqlalchemy.exc import NoSuchTableError
-from util.dbutil import get_database_type, create_table, insert_into_table, postgres_insert, pull_from_table, retrieve_columns_from_table, retrieve_tables_from_db
+from util.dbutil import get_database_type, create_table, insert_into_table, insert_into_table_postgres_efficient, insert_into_table_postgres_efficient, insert_into_table_postgres_slow, pull_from_table, retrieve_columns_from_table, retrieve_tables_from_db
 from util.csvutil import detect_headers, read_csv_from_file_and_save, get_rows_from_csv
 from util.tasks import detect_schema, sanitize_name
 
@@ -48,7 +48,10 @@ def upload_view(request):
     if DB_TYPE == 'sqlite':
         insert_into_table(table_name, headers, rows)
     else:
-        postgres_insert(table_name)
+        try:
+            insert_into_table_postgres_efficient(table_name)
+        except:
+            insert_into_table_postgres_slow(table_name, headers, rows)
     ResultSet = pull_from_table(table_name)
     df = pd.DataFrame(ResultSet, columns=headers)
     json_data = df.to_json(orient='records')

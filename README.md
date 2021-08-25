@@ -9,19 +9,24 @@ A self-learning project (work in progress) written in ```Python``` which provide
 * HTML to receive .CSV file using jinja2 template
 * Pyramid as a web framework
 * SQLAlchemy for database management
-* SQLite or Postgres as Database
+* SQLite and Postgres as Database
 * jQuery + HTML + CSS template for file upload
 
 ## Steps followed
+* Read .ini file for database details
 * Receive file via browse button
 * Detect schema of .csv file (Currently INT, REAL and TEXT supported)
 * Sanitize filename by keeping alphanumeric characters
 * Create table with a dynamic SQL query with this new sanitized name and correct schema type
 * Insert into table using a SQL query
+  * In case of Postgres database, COPY command is first tried to make fast bulk inserts, but if it fails, the code falls back to slow inserting into the table, row by row
 * Retrieve the table from database and send rows as JSON to frontend
 * Display table using [DataTables](https://datatables.net/)
 
 ## How to run
+* Open config.ini and set database configuration.
+  * db_type can be either 'sqlite' or 'postgres'
+  * For 'sqlite' type, only db_name is required, other parameters will be ignored
 * Run the following command
 ```console
 ./python3 app.py
@@ -29,10 +34,12 @@ A self-learning project (work in progress) written in ```Python``` which provide
 
 * Visit http://localhost:6543/
 * Select a CSV file which is UTF-8 compatable, and has the first row as headers.
+* Two endpoints have been included:
+  * /datasets to view the currently added tables
+  * /columns/{table_name} to view the columns under a table 
 
 ## Future improvements
 * Add more test cases
-* Give an option to select from the tables uploaded so far
 * Use Celery
 
 ## References

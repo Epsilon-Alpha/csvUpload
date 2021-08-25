@@ -4,23 +4,30 @@ import psycopg2
 import logging
 import os
 
-from sqlalchemy.sql.expression import table
+from configparser import ConfigParser
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
-DB_TYPE = None
+def read_config():
+    config = ConfigParser()
+    config.read('config.ini')
+    global DB_TYPE, DB_NAME, DB_HOST, DB_USER, DB_PASS, DB_STRING
+    DB_TYPE = config.get('database', 'db_type')
+    DB_NAME = config.get('database', 'db_name')
+    if DB_TYPE == 'postgres':
+        DB_HOST = config.get('postgres', 'host')
+        DB_USER = config.get('postgres', 'user')
+        DB_PASS = config.get('postgres', 'password')
+        DB_STRING = f'postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}'
+    else:
+        DB_STRING = f'sqlite:///{DB_NAME}'
 
-def db_connect(db_string):
+def db_connect():
     try:
         global engine
-        global DB_TYPE
-        if 'postgres' in db_string:
-            DB_TYPE = 'postgres'
-        elif 'sqlite in db_string':
-            DB_TYPE = 'sqlite'
-
-        engine = create_engine(db_string)
+        read_config()
+        engine = create_engine(DB_STRING)
         log.info("Connected to DB!")
         return True
     except SQLAlchemyError as e:
@@ -63,22 +70,23 @@ def insert_into_table(table_name, headers, rows):
         conn.execute(query, rows)
     log.info(f"Inserted into table {table_name} successfully!")
    
-# def insert_into_table_postgres(table_name, headers, rows):
-#     for row in rows:
-#         headers_formatted = ','.join(f'"{h}"' for h in headers)
-#         row_formatted = str()
-#         for item in row:
-#             if "'" in item:
-#                 item = item.replace("'", "''")
-#             row_formatted += f"E'{item}',"
-#         row_formatted = row_formatted[:-1]
-#         query = f'INSERT INTO {table_name} ({headers_formatted}) VALUES({row_formatted})'
-#         with engine.connect() as conn:
-#            conn.execute(query)
-#     log.info(f"Inserted into table {table_name} successfully!")
+def insert_into_table_postgres_slow(table_name, headers, rows):
+    for row in rows:
+        headers_formatted = ','.join(f'"{h}"' for h in headers)
+        row_formatted = str()
+        for item in row:
+            if "'" in item:
+                item = item.replace("'", "''")
+            row_formatted += f"E'{item}',"
+        row_formatted = row_formatted[:-1]
+        query = f'INSERT INTO {table_name} ({headers_formatted}) VALUES({row_formatted})'
+        with engine.connect() as conn:
+           conn.execute(query)
+    log.info(f"Inserted into table {table_name} successfully!")
 
-def postgres_insert(table_name):
-    conn = psycopg2.connect("host=localhost dbname=testdb user=postgres password=00000000")
+def insert_into_table_postgres_efficient(table_name):
+    CONNECTION_STRING = "host={} dbname={} user={} password={}".format(DB_HOST, DB_NAME, DB_USER, DB_PASS)
+    conn = psycopg2.connect(CONNECTION_STRING)
     cur = conn.cursor()
     with open('temp.csv') as f:
         next(f)
