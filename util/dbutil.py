@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, MetaData, Table, select
 from sqlalchemy.exc import SQLAlchemyError
 import psycopg2
 import logging
+import os
 
 from sqlalchemy.sql.expression import table
 
@@ -84,6 +85,7 @@ def postgres_insert(table_name):
         cur.copy_from(f, table_name.lower(), sep=',')
         conn.commit()
         conn.close()
+    os.remove('temp.csv')
 
 def pull_from_table(table_name):
     if DB_TYPE == 'postgres':
