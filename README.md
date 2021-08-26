@@ -27,8 +27,11 @@ A self-learning project (work in progress) written in ```Python``` which provide
 * Open config.ini and set database configuration.
   * db_type can be either 'sqlite' or 'postgres'
   * For 'sqlite' type, only db_name is required, other parameters will be ignored
-* Run the following command
+* Run the following commands in the root of the project
+  * The first command starts a celery worker
+  * The second command runs the pyramid application
 ```console
+celery util.tasks worker --loglevel=INFO
 ./python3 app.py
 ```
 
