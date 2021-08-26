@@ -2,7 +2,6 @@ from sqlalchemy import create_engine, MetaData, Table, select
 from sqlalchemy.exc import SQLAlchemyError
 import psycopg2
 import logging
-import os
 
 from configparser import ConfigParser
 
@@ -21,7 +20,7 @@ def read_config():
         DB_PASS = config.get('postgres', 'password')
         DB_STRING = f'postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}'
     else:
-        DB_STRING = f'sqlite:///{DB_NAME}'
+        DB_STRING = f'sqlite:///{DB_NAME}.db'
 
 def db_connect():
     try:
@@ -93,7 +92,6 @@ def insert_into_table_postgres_efficient(table_name):
         cur.copy_from(f, table_name.lower(), sep=',')
         conn.commit()
         conn.close()
-    os.remove('temp.csv')
 
 def pull_from_table(table_name):
     if DB_TYPE == 'postgres':

@@ -40,7 +40,6 @@ A self-learning project (work in progress) written in ```Python``` which provide
 
 ## Future improvements
 * Add more test cases
-* Use Celery
 
 ## References
 * [Process CSV file from web form with Python](https://stackoverflow.com/questions/22009034/how-to-process-uploaded-csv-file-from-web-form-with-python-3)

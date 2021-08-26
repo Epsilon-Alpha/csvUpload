@@ -2,6 +2,8 @@ from pyramid.response import Response
 from pyramid.view import view_config
 import pandas as pd
 import json
+import os
+import time
 
 from sqlalchemy.exc import NoSuchTableError
 from util.dbutil import get_database_type, create_table, insert_into_table, insert_into_table_postgres_efficient, insert_into_table_postgres_efficient, insert_into_table_postgres_slow, pull_from_table, retrieve_columns_from_table, retrieve_tables_from_db
@@ -41,8 +43,13 @@ def upload_view(request):
     if rows == None:
         return Response('Empty CSV')
 
-    schema  = detect_schema(rows)
-    table_name = sanitize_name(filename)
+    schema  = detect_schema.delay(rows)
+    table_name = sanitize_name.delay(filename)
+    while not (schema.ready() and table_name.ready()):
+        time.sleep(1)
+    
+    schema = schema.get()
+    table_name = table_name.get()
     create_table(table_name, headers, schema)
     DB_TYPE = get_database_type()
     if DB_TYPE == 'sqlite':
@@ -52,6 +59,8 @@ def upload_view(request):
             insert_into_table_postgres_efficient(table_name)
         except:
             insert_into_table_postgres_slow(table_name, headers, rows)
+
+    os.remove('temp.csv')
     ResultSet = pull_from_table(table_name)
     df = pd.DataFrame(ResultSet, columns=headers)
     json_data = df.to_json(orient='records')
