@@ -28,11 +28,13 @@ A self-learning project (work in progress) written in ```Python``` which provide
   * db_type can be either 'sqlite' or 'postgres'
   * For 'sqlite' type, only db_name is required, other parameters will be ignored
 * Run the following commands in the root of the project
-  * The first command starts a celery worker
-  * The second command runs the pyramid application
+  * The first command installs rabbitmq-server
+  * The second command starts a celery worker
+  * The third command runs the pyramid application
 ```console
-celery util.tasks worker --loglevel=INFO
-./python3 app.py
+sudo apt-get install rabbitmq-server
+celery -A util.tasks worker --loglevel=INFO
+python3 ./app.py
 ```
 
 * Visit http://localhost:6543/
